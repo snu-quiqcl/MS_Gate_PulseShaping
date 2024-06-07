@@ -31,6 +31,8 @@ class TPP:
     max_delta : float = None
     min_Omega : float = None
     min_delta : float = None
+    n_0 : int = None
+    manual_mode_frequency : bool = None
     
     # variables
     Omega : np.array  = None
@@ -91,6 +93,18 @@ class TPP:
         with open(file_path, "r") as file:
             data = json.load(file)
             
+            if str(data["manual_mode_frequency"]) == "True": 
+                cls.manual_mode_frequency = True
+            else:
+                cls.manual_mode_frequency = False
+            
+            if cls.manual_mode_frequency:
+                cls.omega = [float(x) for x in data["omega"]]
+                if len(cls.omega) != cls.max_k:
+                    raise Exception(">> Number of mode frequncies are "
+                                    "different from number of mode")
+            
+            cls.n_0 = int(data["n_0"])
             cls.Deltak = float(data["Deltak"])
             cls.target_ion_index1 = int(data["target_ion_index1"])
             cls.target_ion_index2 = int(data["target_ion_index2"])
@@ -310,7 +324,8 @@ def extendVariable(original_variable : np.array) -> np.array:
         extended_variable[start_index:end_index] = original_variable[i]
     return extended_variable
     
-def plotComplex(name : str , complex_array : np.array) -> None:
+def plotComplex(name : str , complex_array : np.array, 
+                gate_index : int = 0) -> None:
     real_parts = np.real(complex_array)
     imag_parts = np.imag(complex_array)
     color_len : int = 31
@@ -332,22 +347,49 @@ def plotComplex(name : str , complex_array : np.array) -> None:
             
     plt.scatter(real_parts[-1], imag_parts[-1], 
                 color='black', marker='x', s=100, label='Last Point')
+    plt.scatter(real_parts[gate_index], imag_parts[gate_index], 
+                color='red', marker='x', s=100, label='Gate Point')
     plt.xlabel('Real Part')
     plt.ylabel('Imaginary Part')
     plt.title(name)
     plt.grid(True)
+    plt.legend()
     plt.savefig(f"figures/{name}.png", dpi=IMAGE_DPI)
     plt.show()
     
-def plotTimeEvolution(name : str , variable : np.array) -> None:
+def plotTimeEvolution(
+        name : str , variable : np.array, gate_index : int = 0) -> None:
     plt.figure(dpi=IMAGE_DPI)
-    plt.plot(variable)
-    plt.xlabel('time')
+    fig, ax = plt.subplots(figsize=(10, 6))
+    ax.plot(TPP.tau_array*1000000, variable)
+    plt.xlabel('time [us]')
     plt.ylabel('Variable')
+    if name == "Theta":
+        ax.axhline(y=np.pi / 4, color='r', linestyle='--', label='\Theta = π/4')
+        ax.axhline(y=-np.pi / 4, color='r', linestyle='--', label='\Theta = -π/4')
+            
+    if name != "Theta":
+        plt.ylim(0,1)
+    
+    ax.axvline(x=TPP.tau_array[gate_index]*1000000, color = 'r',  linestyle='--', 
+               label=f'gate time = {TPP.tau_array[gate_index]*1000000}')
+    
+    ax.legend()
+    
     plt.title(name)
     plt.savefig(f"figures/{name}.png", dpi=IMAGE_DPI)
     plt.show()
 
+def plotSimpleTimeEvolution(name : str , variable : np.array) -> None:
+    plt.figure(dpi=IMAGE_DPI)
+    fig, ax = plt.subplots(figsize=(10, 6))
+    ax.plot(TPP.tau_array*1000000, variable)
+    plt.xlabel('time [us]')
+    plt.ylabel('Variable')
+    
+    plt.title(name)
+    plt.savefig(f"figures/{name}.png", dpi=IMAGE_DPI)
+    plt.show()
 
 def plotVariable(name : str , variable : np.array) -> None:
     plt.figure(dpi=IMAGE_DPI)
