@@ -303,11 +303,20 @@ def plotCostFunction() -> None:
     plt.show()
     
 def plotResult() -> None:
+    total_alpha_array_j1 : list[np.array] = []
+    total_alpha_array_j2 : list[np.array] = []
+    total_Theta_array : np.array = PC.totalThetaArray(
+        PC.extendVariable(PC.TPP.Omega), 
+        PC.extendVariable(PC.TPP.delta))
+    P00 : np.array = None
+    P01 : np.array = None
+    P10 : np.array = None
+    P11 : np.array = None
+    
     plotCostFunction()
     
     for i in range(PC.TPP.max_k):
-        PC.plotComplex(
-            f"{PC.TPP.target_ion_index1} ion, {i} mode", 
+        total_alpha_array_j1.append(
             PC.alphaArray(
                 PC.TPP.target_ion_index1,
                 i,
@@ -315,8 +324,7 @@ def plotResult() -> None:
                 PC.extendVariable(PC.TPP.delta)
             )
         )
-        PC.plotComplex(
-            f"{PC.TPP.target_ion_index2} ion, {i} mode", 
+        total_alpha_array_j2.append(
             PC.alphaArray(
                 PC.TPP.target_ion_index2,
                 i,
@@ -324,11 +332,146 @@ def plotResult() -> None:
                 PC.extendVariable(PC.TPP.delta)
             )
         )
-    PC.plotTimeEvolution("Theta",PC.totalThetaArray(
-        PC.extendVariable(PC.TPP.Omega), 
-        PC.extendVariable(PC.TPP.delta))
+        PC.plotComplex(
+            f"{PC.TPP.target_ion_index1} ion, {i} mode", 
+            total_alpha_array_j1[-1]
+        )
+        PC.plotComplex(
+            f"{PC.TPP.target_ion_index2} ion, {i} mode", 
+            total_alpha_array_j2[-1]
+        )
+    PC.plotTimeEvolution("Theta",total_Theta_array)
+    
+    # population calculation
+    
+    P00 = ( 
+        1/4
+        
+        + 1/8 * np.exp(
+            -2 * sum(np.abs(x+y) ** 2 
+                 for x,y in zip(total_alpha_array_j1, total_alpha_array_j2)
+             )
+        )
+        + 1/8 * np.exp(
+            -2 * sum(np.abs(x-y) ** 2 
+                 for x,y in zip(total_alpha_array_j1, total_alpha_array_j2)
+             )
+        )
+        
+        +1/4 * np.real(
+            np.exp(2*1j*total_Theta_array) * np.exp( 
+                sum(-2 * np.abs(y) ** 2 - x * np.conj(y) + y * np.conj(x) 
+                    for x,y in zip(total_alpha_array_j1, total_alpha_array_j2)
+                )
+            )
+        )
+        
+        +1/4 * np.real(
+            np.exp(2*1j*total_Theta_array) * np.exp( 
+                sum(-2 * np.abs(x) ** 2 - y * np.conj(x) + x * np.conj(y) 
+                    for x,y in zip(total_alpha_array_j1, total_alpha_array_j2)
+               )
+           )
+       )
     )
     
+    P11 = ( 
+        1/4
+        
+        + 1/8 * np.exp(
+            -2 * sum(np.abs(x+y) ** 2 
+                 for x,y in zip(total_alpha_array_j1, total_alpha_array_j2)
+             )
+        )
+        + 1/8 * np.exp(
+            -2 * sum(np.abs(x-y) ** 2 
+                 for x,y in zip(total_alpha_array_j1, total_alpha_array_j2)
+             )
+        )
+        
+        -1/4 * np.real(
+            np.exp(2*1j*total_Theta_array) * np.exp( 
+                sum(-2 * np.abs(y) ** 2 - x * np.conj(y) + y * np.conj(x) 
+                    for x,y in zip(total_alpha_array_j1, total_alpha_array_j2)
+                )
+            )
+        )
+        
+        -1/4 * np.real(
+            np.exp(2*1j*total_Theta_array) * np.exp( 
+                sum(-2 * np.abs(x) ** 2 - y * np.conj(x) + x * np.conj(y) 
+                    for x,y in zip(total_alpha_array_j1, total_alpha_array_j2)
+               )
+           )
+       )
+    )
+    
+    P10 = ( 
+        1/4
+        
+        - 1/8 * np.exp(
+            -2 * sum(np.abs(x+y) ** 2 
+                 for x,y in zip(total_alpha_array_j1, total_alpha_array_j2)
+             )
+        )
+        - 1/8 * np.exp(
+            -2 * sum(np.abs(x-y) ** 2 
+                 for x,y in zip(total_alpha_array_j1, total_alpha_array_j2)
+             )
+        )
+        
+        +1/4 * np.real(
+            np.exp(2*1j*total_Theta_array) * np.exp( 
+                sum(-2 * np.abs(y) ** 2 - x * np.conj(y) + y * np.conj(x) 
+                    for x,y in zip(total_alpha_array_j1, total_alpha_array_j2)
+                )
+            )
+        )
+        
+        -1/4 * np.real(
+            np.exp(2*1j*total_Theta_array) * np.exp( 
+                sum(-2 * np.abs(x) ** 2 - y * np.conj(x) + x * np.conj(y) 
+                    for x,y in zip(total_alpha_array_j1, total_alpha_array_j2)
+               )
+           )
+       )
+    )
+    
+    P01 = ( 
+        1/4
+        
+        - 1/8 * np.exp(
+            -2 * sum(np.abs(x+y) ** 2 
+                 for x,y in zip(total_alpha_array_j1, total_alpha_array_j2)
+             )
+        )
+        - 1/8 * np.exp(
+            -2 * sum(np.abs(x-y) ** 2 
+                 for x,y in zip(total_alpha_array_j1, total_alpha_array_j2)
+             )
+        )
+        
+        -1/4 * np.real(
+            np.exp(2*1j*total_Theta_array) * np.exp( 
+                sum(-2 * np.abs(y) ** 2 - x * np.conj(y) + y * np.conj(x) 
+                    for x,y in zip(total_alpha_array_j1, total_alpha_array_j2)
+                )
+            )
+        )
+        
+        +1/4 * np.real(
+            np.exp(2*1j*total_Theta_array) * np.exp( 
+                sum(-2 * np.abs(x) ** 2 - y * np.conj(x) + x * np.conj(y) 
+                    for x,y in zip(total_alpha_array_j1, total_alpha_array_j2)
+               )
+           )
+       )
+    )
+    
+    PC.plotTimeEvolution("P00",P00)
+    PC.plotTimeEvolution("P11",P11)
+    PC.plotTimeEvolution("P01",P01)
+    PC.plotTimeEvolution("P10",P10)
     PC.plotVariable("Omega",PC.TPP.Omega)
     PC.plotVariable("delta",PC.TPP.delta)
     
