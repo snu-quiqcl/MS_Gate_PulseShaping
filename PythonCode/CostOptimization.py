@@ -312,8 +312,16 @@ def plotResult() -> None:
     P01 : np.array = None
     P10 : np.array = None
     P11 : np.array = None
+    gate_index : int = 0
     
     plotCostFunction()
+    
+    for i in range(len(total_Theta_array)):
+        if total_Theta_array[i] > np.pi/4 or total_Theta_array[i] < -np.pi/4:
+            gate_index = i
+            break
+    
+    PC.plotTimeEvolution("Theta",total_Theta_array,gate_index = gate_index)
     
     for i in range(PC.TPP.max_k):
         total_alpha_array_j1.append(
@@ -334,13 +342,18 @@ def plotResult() -> None:
         )
         PC.plotComplex(
             f"{PC.TPP.target_ion_index1} ion, {i} mode", 
-            total_alpha_array_j1[-1]
+            total_alpha_array_j1[-1],
+            gate_index = gate_index
         )
         PC.plotComplex(
             f"{PC.TPP.target_ion_index2} ion, {i} mode", 
-            total_alpha_array_j2[-1]
+            total_alpha_array_j2[-1],
+            gate_index = gate_index
         )
-    PC.plotTimeEvolution("Theta",total_Theta_array)
+        phase = np.angle(total_alpha_array_j1[-1])
+        PC.plotSimpleTimeEvolution(f"{PC.TPP.target_ion_index1} ion, {i} mode phase",phase)
+        phase = np.angle(total_alpha_array_j2[-1])
+        PC.plotSimpleTimeEvolution(f"{PC.TPP.target_ion_index2} ion, {i} mode phase",phase)
     
     # population calculation
     
@@ -348,19 +361,21 @@ def plotResult() -> None:
         1/4
         
         + 1/8 * np.exp(
-            -2 * sum(np.abs(x+y) ** 2 
+            -(4 * PC.TPP.n_0 + 2) * sum(np.abs(x+y) ** 2 
                  for x,y in zip(total_alpha_array_j1, total_alpha_array_j2)
              )
         )
         + 1/8 * np.exp(
-            -2 * sum(np.abs(x-y) ** 2 
+            -(4 * PC.TPP.n_0 + 2) * sum(np.abs(x-y) ** 2 
                  for x,y in zip(total_alpha_array_j1, total_alpha_array_j2)
              )
         )
         
         +1/4 * np.real(
             np.exp(2*1j*total_Theta_array) * np.exp( 
-                sum(-2 * np.abs(y) ** 2 - x * np.conj(y) + y * np.conj(x) 
+                sum(-(4 * PC.TPP.n_0 + 2) * np.abs(y) ** 2 
+                    - (2 * PC.TPP.n_0 + 1) * x * np.conj(y) 
+                    + (2 * PC.TPP.n_0 + 1) * y * np.conj(x) 
                     for x,y in zip(total_alpha_array_j1, total_alpha_array_j2)
                 )
             )
@@ -368,30 +383,34 @@ def plotResult() -> None:
         
         +1/4 * np.real(
             np.exp(2*1j*total_Theta_array) * np.exp( 
-                sum(-2 * np.abs(x) ** 2 - y * np.conj(x) + x * np.conj(y) 
+                sum(-(4 * PC.TPP.n_0 + 2) * np.abs(x) ** 2
+                    - (2 * PC.TPP.n_0 + 1) * y * np.conj(x)
+                    + (2 * PC.TPP.n_0 + 1) * x * np.conj(y) 
                     for x,y in zip(total_alpha_array_j1, total_alpha_array_j2)
-               )
-           )
-       )
+                )
+            )
+        )
     )
     
     P11 = ( 
         1/4
         
         + 1/8 * np.exp(
-            -2 * sum(np.abs(x+y) ** 2 
+            -(4 * PC.TPP.n_0 + 2) * sum(np.abs(x+y) ** 2 
                  for x,y in zip(total_alpha_array_j1, total_alpha_array_j2)
              )
         )
         + 1/8 * np.exp(
-            -2 * sum(np.abs(x-y) ** 2 
+            -(4 * PC.TPP.n_0 + 2) * sum(np.abs(x-y) ** 2 
                  for x,y in zip(total_alpha_array_j1, total_alpha_array_j2)
              )
         )
         
         -1/4 * np.real(
             np.exp(2*1j*total_Theta_array) * np.exp( 
-                sum(-2 * np.abs(y) ** 2 - x * np.conj(y) + y * np.conj(x) 
+                sum(-(4 * PC.TPP.n_0 + 2) * np.abs(y) ** 2 
+                    - (2 * PC.TPP.n_0 + 1) * x * np.conj(y) 
+                    + (2 * PC.TPP.n_0 + 1) * y * np.conj(x) 
                     for x,y in zip(total_alpha_array_j1, total_alpha_array_j2)
                 )
             )
@@ -399,7 +418,9 @@ def plotResult() -> None:
         
         -1/4 * np.real(
             np.exp(2*1j*total_Theta_array) * np.exp( 
-                sum(-2 * np.abs(x) ** 2 - y * np.conj(x) + x * np.conj(y) 
+                sum(-(4 * PC.TPP.n_0 + 2) * np.abs(x) ** 2
+                    - (2 * PC.TPP.n_0 + 1) * y * np.conj(x)
+                    + (2 * PC.TPP.n_0 + 1) * x * np.conj(y) 
                     for x,y in zip(total_alpha_array_j1, total_alpha_array_j2)
                )
            )
@@ -410,19 +431,21 @@ def plotResult() -> None:
         1/4
         
         - 1/8 * np.exp(
-            -2 * sum(np.abs(x+y) ** 2 
+            -(4 * PC.TPP.n_0 + 2) * sum(np.abs(x+y) ** 2 
                  for x,y in zip(total_alpha_array_j1, total_alpha_array_j2)
              )
         )
         - 1/8 * np.exp(
-            -2 * sum(np.abs(x-y) ** 2 
+            -(4 * PC.TPP.n_0 + 2) * sum(np.abs(x-y) ** 2 
                  for x,y in zip(total_alpha_array_j1, total_alpha_array_j2)
              )
         )
         
         +1/4 * np.real(
             np.exp(2*1j*total_Theta_array) * np.exp( 
-                sum(-2 * np.abs(y) ** 2 - x * np.conj(y) + y * np.conj(x) 
+                sum(-(4 * PC.TPP.n_0 + 2) * np.abs(y) ** 2 
+                    - (2 * PC.TPP.n_0 + 1) * x * np.conj(y) 
+                    + (2 * PC.TPP.n_0 + 1) * y * np.conj(x) 
                     for x,y in zip(total_alpha_array_j1, total_alpha_array_j2)
                 )
             )
@@ -430,7 +453,9 @@ def plotResult() -> None:
         
         -1/4 * np.real(
             np.exp(2*1j*total_Theta_array) * np.exp( 
-                sum(-2 * np.abs(x) ** 2 - y * np.conj(x) + x * np.conj(y) 
+                sum(-(4 * PC.TPP.n_0 + 2) * np.abs(x) ** 2
+                    - (2 * PC.TPP.n_0 + 1) * y * np.conj(x)
+                    + (2 * PC.TPP.n_0 + 1) * x * np.conj(y) 
                     for x,y in zip(total_alpha_array_j1, total_alpha_array_j2)
                )
            )
@@ -441,19 +466,21 @@ def plotResult() -> None:
         1/4
         
         - 1/8 * np.exp(
-            -2 * sum(np.abs(x+y) ** 2 
+            -(4 * PC.TPP.n_0 + 2) * sum(np.abs(x+y) ** 2 
                  for x,y in zip(total_alpha_array_j1, total_alpha_array_j2)
              )
         )
         - 1/8 * np.exp(
-            -2 * sum(np.abs(x-y) ** 2 
+            -(4 * PC.TPP.n_0 + 2) * sum(np.abs(x-y) ** 2 
                  for x,y in zip(total_alpha_array_j1, total_alpha_array_j2)
              )
         )
         
         -1/4 * np.real(
             np.exp(2*1j*total_Theta_array) * np.exp( 
-                sum(-2 * np.abs(y) ** 2 - x * np.conj(y) + y * np.conj(x) 
+                sum(-(4 * PC.TPP.n_0 + 2) * np.abs(y) ** 2 
+                    - (2 * PC.TPP.n_0 + 1) * x * np.conj(y) 
+                    + (2 * PC.TPP.n_0 + 1) * y * np.conj(x) 
                     for x,y in zip(total_alpha_array_j1, total_alpha_array_j2)
                 )
             )
@@ -461,19 +488,37 @@ def plotResult() -> None:
         
         +1/4 * np.real(
             np.exp(2*1j*total_Theta_array) * np.exp( 
-                sum(-2 * np.abs(x) ** 2 - y * np.conj(x) + x * np.conj(y) 
+                sum(-(4 * PC.TPP.n_0 + 2) * np.abs(x) ** 2
+                    - (2 * PC.TPP.n_0 + 1) * y * np.conj(x)
+                    + (2 * PC.TPP.n_0 + 1) * x * np.conj(y) 
                     for x,y in zip(total_alpha_array_j1, total_alpha_array_j2)
                )
            )
        )
     )
     
-    PC.plotTimeEvolution("P00",P00)
-    PC.plotTimeEvolution("P11",P11)
-    PC.plotTimeEvolution("P01",P01)
-    PC.plotTimeEvolution("P10",P10)
+    PC.plotTimeEvolution("P00",P00,gate_index = gate_index)
+    PC.plotTimeEvolution("P11",P11,gate_index = gate_index)
+    PC.plotTimeEvolution("P01",P01,gate_index = gate_index)
+    PC.plotTimeEvolution("P10",P10,gate_index = gate_index)
     PC.plotVariable("Omega",PC.TPP.Omega)
     PC.plotVariable("delta",PC.TPP.delta)
+    
+    ##
+    fig, ax = plt.subplots(figsize=(10, 6))
+
+    ax.plot(PC.TPP.tau_array*1000000, P00, label='P00')
+    ax.plot(PC.TPP.tau_array*1000000, P11, label='P11', color='r')
+    ax.plot(PC.TPP.tau_array*1000000, P01+P10, label='P01+P10', color='g')
+    ax.axvline(x=PC.TPP.tau_array[gate_index]*1000000, color = 'r',  linestyle='--', 
+               label=f'gate time = {PC.TPP.tau_array[gate_index]*1000000}')
+    
+    ax.set_title('Population')
+    ax.legend()
+    
+    plt.xlabel("time [us]")
+    plt.ylim(0,1)
+    plt.show()
     
 if __name__ == "__main__":
     ADAM.setGlobalVariables(file_path = "OptimizationConfiguration.json")
