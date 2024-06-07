@@ -20,7 +20,7 @@ class ADAM(PC.TPP):
     beta1 : float
     beta2 : float
     epsilon : float
-    batch : int
+    epoch : int
     rescale_factor1 : float 
     cost_values : list[float] = []
     log : str = ""
@@ -50,7 +50,7 @@ class ADAM(PC.TPP):
             cls.beta1 = float(data["beta1"])
             cls.beta2 = float(data["beta2"])
             cls.epsilon = float(data["epsilon"])
-            cls.batch = int(data["batch"])
+            cls.epoch = int(data["epoch"])
             cls.rescale_factor1 = float(data["rescale_factor1"])
             cls.opt_mode = str(data["opt_mode"])
             
@@ -148,7 +148,7 @@ class ADAM(PC.TPP):
         v_delta_t : np.array = np.zeros(len(PC.TPP.delta))
         log:str = "\n"
         
-        for i in range(cls.batch):
+        for i in range(cls.epoch):
             log += "\n"
             log +=(
                 "##################################################################\n"
