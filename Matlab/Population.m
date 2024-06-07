@@ -55,7 +55,7 @@ S = strrep(S,"A_{3}","\ket{-\alpha_{1}+\alpha_{2}}");
 S = strrep(S,"A_{4}","\ket{-\alpha_{1}-\alpha_{2}}");
 % Swap conj(A) * A to A * conj(A) even with other patterns in between
 fun = @(s)sprintf('.{%d}',find(cumsum((s=='}' )-(s=='{'))>0,1,'first'));
-S = regexprep(S, '\\ket\{((??@fun($'')))(.+?(?=\\bra))\\bra\{((??@fun($'')))', '$2\\braket{{$1\|{$3}');
+S = regexprep(S, '\\ket\{((??@fun($'')))(.+?(?=\\bra))\\bra\{((??@fun($'')))', '$2\\braket{{$3\|{$1}');
 S = regexprep(S, '\\bra\{((??@fun($'')))(.+?(?=\\ket))\\ket\{((??@fun($'')))', '$2\\braket{{$1\|{$3}');
 
 % with braket term
