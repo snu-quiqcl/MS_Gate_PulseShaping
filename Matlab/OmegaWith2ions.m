@@ -47,8 +47,8 @@ for i = 1:LIST_NUM
             
             A = 0;
             A = 1./( omega_1 .* ( omega_1 - delta(i,j) ) ) - 1./( omega_2 .* ( omega_2 - delta(i,j) ) );
-            A
-            Omega(i,j) = sqrt(M.*pi ./ (hbar .*tau(i,j).* abs(A) ) ) ./ delta_k;
+            
+            Omega(i,j) = sqrt(2.*M.*pi ./ (hbar .*tau(i,j).* abs(A) ) ) ./ delta_k;
         end
     end
 end
