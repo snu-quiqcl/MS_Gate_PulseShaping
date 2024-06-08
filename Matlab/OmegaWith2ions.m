@@ -3,13 +3,15 @@ clc
 
 % Number of m1, m2 list
 
-N = 4;
-LIST_NUM = 2.*N+1;
-DISPLAY = "Omega";
+N = 6;
+LIST_NUM = N;
+DISPLAY = "delta";
 
 % Define m1_list and m2_list
-m1_list = -N:1:N;
-m2_list = -N:1:N;
+m1_list = 1:1:N;
+m2_list = 1:1:N;
+m1 = 6;
+m2 = 1;
 
 % Define constants (replace these with actual values)
 omega_1 = 2 .* pi .* 2.05 .* 1E6;
