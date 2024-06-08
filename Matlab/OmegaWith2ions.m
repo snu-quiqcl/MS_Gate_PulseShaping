@@ -104,4 +104,3 @@ for k = 1:length(b)
 end
 
 % Adjust the colorbar
-colorbar;
