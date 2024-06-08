@@ -104,3 +104,13 @@ for k = 1:length(b)
 end
 
 % Adjust the colorbar
+colorbar;
+
+delta_value = delta(m1,m2) ./ (2 .* pi .* 1E6);
+Omega_value = Omega(m1,m2) ./ (2 .* pi .* 1E3);
+tau_value = tau(m1,m2) .* (1E6);
+
+disp("m1 = " + string(m1) + ", m2 = " + string(m2));
+disp("\delta = " + sprintf('%.10f', delta_value) + "[MHz]\\")
+disp("\Omega = " + sprintf('%.10f', Omega_value) + "[kHz]\\")
+disp("\tau = " + sprintf('%.10f', tau_value) + "[\mu s]\\")
