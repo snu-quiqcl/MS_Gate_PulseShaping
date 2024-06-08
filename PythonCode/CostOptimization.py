@@ -13,6 +13,7 @@ import matplotlib.pyplot as plt
 from typing import Tuple, Literal
 
 ALIGN_LENGTH = 66
+IMAGE_DPI = 200
 
 class ADAM(PC.TPP):
     derivative : float
@@ -518,7 +519,10 @@ def plotResult() -> None:
     
     plt.xlabel("time [us]")
     plt.ylim(0,1)
+    plt.savefig(f"figures/population.png", dpi=IMAGE_DPI)
     plt.show()
+    
+    print(f"gate_index : {gate_index}")
     
 if __name__ == "__main__":
     ADAM.setGlobalVariables(file_path = "OptimizationConfiguration.json")
