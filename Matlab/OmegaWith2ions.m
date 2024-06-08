@@ -92,6 +92,7 @@ elseif strcmp(DISPLAY,"delta") == 1
     xlabel('m1');
     ylabel('m2');
     zlabel('\delta [MHz]');
+    zlim([(omega_1 .* 0.999 ./(2 * pi * 1E6)) ( omega_2 .* 1.001  ./(2 * pi * 1E6))])
     title('3D Bar Plot of \delta');
 end
 
