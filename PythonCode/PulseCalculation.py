@@ -365,8 +365,10 @@ def plotTimeEvolution(
     plt.xlabel('time [us]')
     plt.ylabel('Variable')
     if name == "Theta":
-        ax.axhline(y=np.pi / 4, color='r', linestyle='--', label='\Theta = π/4')
-        ax.axhline(y=-np.pi / 4, color='r', linestyle='--', label='\Theta = -π/4')
+        if variable[gate_index] > 0:
+            ax.axhline(y=np.pi / 4, color='r', linestyle='--', label='\Theta = π/4')
+        if variable[gate_index] < 0:
+            ax.axhline(y=-np.pi / 4, color='r', linestyle='--', label='\Theta = -π/4')
             
     if name != "Theta":
         plt.ylim(0,1)
