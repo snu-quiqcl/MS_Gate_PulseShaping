@@ -79,32 +79,32 @@ $$ \varepsilon_{\Theta}=\left(\Theta-\frac{\pi}{4}\right)^{2} $$
 ```
 + ```opt_mode```: Specifies the pulse modulation mode. ```AM```, ```FM```, and ```AWG``` mode is possible. Literally, ```AM``` optimizes amplitude within gate time and ```FM``` optimizes freqeuncy within gate time. ```AWG``` optimizes both of them.
 + ```initial_value_shuffle```: Boolean flag indicating whether to make randomness in initial parameter values of $\Omega$ and $\delta$.
-+ ```w_transverse```: Transverse motional mode frequency in Hertz.
-+ ```w_axial```: Axial motional mode frequency in Hertz.
++ ```w_transverse```: Transverse motional mode frequency in unit of $[rad/s]$.
++ ```w_axial```: Axial motional mode frequency in unit of $[rad/s]$.
 + ```manual_mode_frequency```: Boolean flag for using manual mode frequencies. If this flag is ```False```, ```normalModeQuadratic.py``` calculates mode frequency and mode vector based on axial and transverse mode frequencies. On the other hand, if this flag is ```True```, mode frequencies specified in ```omega``` will be used in optimization or population calculation.
 + ```omega```: Array of motional mode frequencies. It is meaningful only when ```manual_mode_frequency = True```
 + ```n_0```: Average thermal mode number. This value does not influence the optimization process. However, they demonstrate the effect of the thermal state in the population calculations performed after the optimization.
 + ```ion_number```: Number of ions in the system.
 + ```parameter_constraint```: Boolean flag indicating whether $\Omega$ or $\delta$ is constrained in the ```max_Omega```, ```min_Omega```, ```max_delta```, and  ```min_delta```. This flag does not guarantee that $\Omega$ and $\delta$ are completely constrained between maximum and minimum parameters. However, by incorporating a ReLU function into the cost function, it introduces a tendency for $\Omega$ and $\delta$ to be optimized within the desired bounds.
 + ```Deltak```: $\Delta k$ value in unit of $[rad/m]$. This values is used when Lamb-Dicke parameter $\eta = \Delta k \sqrt{\hbar/2M\omega}$ is calculated.
-+ ```tau```: Pulse duration in seconds.
++ ```tau```: Pulse duration in unit of $[s]$.
 + ```N```: Number of divided pulses. Note that this is different from ```integral_div```.
 + ```target_ion_index1```: Index of the first target ion. Note that ion index is in the range of ```0 ~ N-1```
 + ```target_ion_index2```: Index of the second target ion.
 + ```rescale_factor1```: Rescale factor for cost calculation. This parameter does not affect the optimization process but provides convenience in viewing the values.
 + ```integral_div```: Number of divisions for integral calculation.
 + ```epoch```: Number of epochs for optimization(i.e. number of iteration).
-+ ```derivative```: Derivative step size for gradient calculation.
++ ```derivative```: Ratio of derivative step size for gradient calculation.
 + ```learning_rate```: Learning rate for the ADAM optimizer. This is recommended to set 0.001 in paper. However for fast optimization, it is recommended to set ```1E3 ~ 1E6``` at initial.
 + ```beta1```: Beta1 parameter for the ADAM optimizer, controlling the exponential decay rate for the first moment estimates. This is recommended to set to 0.001, and do not change if there is no specific reason.
 + ```beta2```: Beta2 parameter for the ADAM optimizer, controlling the exponential decay rate for the second moment estimates.This is recommended to set to 0.999, and do not change if there is no specific reason.
-+ ```epsilon```: Epsilon parameter for the ADAM optimizer, preventing division by zero.
-+ ```max_Omega```: Maximum value for $\Omega$ during optimization.
-+ ```min_Omega```: Minimum value for $\Omega$ during optimization.
-+ ```max_delta```: Maximum value for $\delta$ during optimization.
-+ ```min_delta```: Minimum value for $\delta$ during optimization.
-+ ```Omega```: Array of initial values for $\Omega$.
-+ ```delta```: Array of initial values for $\delta$.
++ ```epsilon```: Epsilon parameter for the ADAM optimizer, preventing division by zero. This is recommended to set to 1e-8, and do not change if there is no specific reason.
++ ```max_Omega```: Maximum value for $\Omega$ during optimization in unit of $[rad/s]$.
++ ```min_Omega```: Minimum value for $\Omega$ during optimization in unit of $[rad/s]$.
++ ```max_delta```: Maximum value for $\delta$ during optimization in unit of $[rad/s]$.
++ ```min_delta```: Minimum value for $\delta$ during optimization in unit of $[rad/s]$.
++ ```Omega```: Array of initial values for $\Omega$ in unit of $[rad/s]$.
++ ```delta```: Array of initial values for $\delta$ in unit of $[rad/s]$.
 
 
 
