@@ -25,7 +25,7 @@ class ImmutableMeta(type):
 class NMQ(metaclass=ImmutableMeta):
     m_ion : float = None
     l_scale : float = None
-    w_transverse : float = 2*np.pi*2*1E6
+    w_transverse : float = 2*np.pi*2.2*1E6
     w_axial : float = 2*np.pi*0.5*1E6
     z_array : list[float] = None
     u_array : list[list[float]]= [[],
@@ -257,8 +257,8 @@ def printInfo(N : int, mode : Literal['transverse', 'axial']) -> None:
     
 
 def doCalculation(
-        w_transverse : float = 2*np.pi*2*1E6, 
-        w_axial : float = 2*np.pi*0.5*1E6,
+        w_transverse : float = 2*np.pi*2.2*1E6, 
+        w_axial : float = 2*np.pi*0.556*1E6,
         ion_number : int = 5
     ) -> None:
     log : str = ''

@@ -176,7 +176,8 @@ class ADAM(PC.TPP):
             log += "]\n"
             
             (Omega_grad, delta_grad) = cls.getGradient(
-                Omega_original = PC.TPP.Omega, delta_original = PC.TPP.delta)
+                Omega_original = PC.TPP.Omega, delta_original = PC.TPP.delta
+            )
             
             m_Omega_t = cls.beta1 * m_Omega_t + (1-cls.beta1) * Omega_grad
             m_delta_t = cls.beta1 * m_delta_t + (1-cls.beta1) * delta_grad
@@ -192,8 +193,10 @@ class ADAM(PC.TPP):
             
             PC.TPP.Omega = (PC.TPP.Omega - cls.learning_rate * m_Omega_t_bc/(np.sqrt(v_Omega_t_bc) + cls.epsilon))
             PC.TPP.delta = (PC.TPP.delta - cls.learning_rate * m_delta_t_bc/(np.sqrt(v_delta_t_bc) + cls.epsilon))
-            cost = cls.costFunction(Omega_original = PC.TPP.Omega,
-                                delta_original = PC.TPP.delta)
+            cost = cls.costFunction(
+                Omega_original = PC.TPP.Omega,
+                delta_original = PC.TPP.delta
+            )
             cls.cost_values.append(cost)
             
             log += (f">> v_Omega_t : {v_Omega_t}\n")
@@ -264,28 +267,60 @@ class ADAM(PC.TPP):
             delta[start_index:end_index] = delta_original[i]
             
         cost = 0
-        for k in range(PC.TPP.max_k):
+        max_index = 0
+        alpha_values = []
+        for k in range(PC.TPP.mode_num):
             alpha_value = PC.alpha(PC.TPP.target_ion_index1, k, Omega, delta)
-            cost += np.abs(alpha_value)**2
+            alpha_avg = PC.alpha_avg(PC.TPP.target_ion_index1, k, Omega, delta)
+            # if k in [0,1,2,3]:
+            #     alpha_value = alpha_value * 100
+            alpha_values.append(np.abs(alpha_value)**2 + np.abs(alpha_avg) ** 2)
+            if alpha_values[max_index] < alpha_value:
+                max_index = k
+        
+        # if np.std(alpha_values, ddof=1) > np.average(alpha_values):
+        # alpha_values[max_index] = alpha_values[max_index] * 10000
+        cost += sum(alpha_values)
             
-        for k in range(PC.TPP.max_k):
+        max_index = 0
+        alpha_values = []
+        for k in range(PC.TPP.mode_num):
             alpha_value = PC.alpha(PC.TPP.target_ion_index2, k, Omega, delta)
-            cost += np.abs(alpha_value)**2
+            alpha_avg = PC.alpha_avg(PC.TPP.target_ion_index2, k, Omega, delta)
+            # if k in [0,1,2,3]:
+            #     alpha_value = alpha_value * 100
+            alpha_values.append(np.abs(alpha_value)**2 + np.abs(alpha_avg) ** 2)
+            if alpha_values[max_index] < alpha_value:
+                max_index = k
+        
+        # if np.std(alpha_values, ddof=1) > np.average(alpha_values):
+        # alpha_values[max_index] = alpha_values[max_index] * 10000
+        cost += sum(alpha_values)
         
         cost = cost * cls.rescale_factor1
         
         theta_value = PC.totalTheta(Omega, delta)
+        
+        phase_sign = "+"
+        
+        phase_error = 0
+        
+        if phase_sign == "+":
+            phase_error = np.abs(theta_value-np.pi/4)**2
+        elif phase_sign == "-":
+            phase_error = np.abs(theta_value+np.pi/4)**2
+        else:
+            raise Exception("Uknown Phase sign")
+            
+        phase_error = phase_error
                 
-        cost += np.abs(theta_value+np.pi/4)**2  * cls.rescale_factor1
+        cost += phase_error * cls.rescale_factor1
         
         if cls.parameter_constraint == True:
             for x in Omega_original:
-                cost += max(-(x - PC.TPP.min_Omega),0) * cls.rescale_factor1 / max(Omega_original)
+                cost += 1e-3 * max(-(x - PC.TPP.min_Omega),0)*(-(x - PC.TPP.min_Omega)) * cls.rescale_factor1 / max(Omega_original)
             for x in Omega_original:
-                cost += max((x - PC.TPP.max_Omega),0) * cls.rescale_factor1 / max(Omega_original)
-        
-        # I found positive theta value through this code...
-        # cost -= sum(np.log(Omega)) * cls.rescale_factor1
+                cost += 1e-3 * max((x - PC.TPP.max_Omega),0) * (x - PC.TPP.max_Omega) * cls.rescale_factor1 / max(Omega_original)
         
         return cost
 
@@ -324,7 +359,7 @@ def plotResult() -> None:
     
     PC.plotTimeEvolution("Theta",total_Theta_array,gate_index = gate_index)
     
-    for i in range(PC.TPP.max_k):
+    for i in range(PC.TPP.mode_num):
         total_alpha_array_j1.append(
             PC.alphaArray(
                 PC.TPP.target_ion_index1,
@@ -352,11 +387,23 @@ def plotResult() -> None:
             gate_index = gate_index
         )
         phase = np.angle(total_alpha_array_j1[-1])
-        PC.plotSimpleTimeEvolution(f"{PC.TPP.target_ion_index1} ion, {i} mode phase",phase)
+        # PC.plotSimpleTimeEvolution(f"{PC.TPP.target_ion_index1} ion, {i} mode phase",phase)
         phase = np.angle(total_alpha_array_j2[-1])
-        PC.plotSimpleTimeEvolution(f"{PC.TPP.target_ion_index2} ion, {i} mode phase",phase)
+        # PC.plotSimpleTimeEvolution(f"{PC.TPP.target_ion_index2} ion, {i} mode phase",phase)
+        
+    plotPopulation(
+        gate_index, 
+        total_alpha_array_j1, 
+        total_alpha_array_j2,
+        total_Theta_array
+    )
     
-    # population calculation
+def plotPopulation(
+        gate_index : int, 
+        total_alpha_array_j1 : np.array, 
+        total_alpha_array_j2 : np.array,
+        total_Theta_array : np.array
+    ) -> None:
     
     P00 = ( 
         1/4
@@ -498,12 +545,12 @@ def plotResult() -> None:
        )
     )
     
-    PC.plotTimeEvolution("P00",P00,gate_index = gate_index)
-    PC.plotTimeEvolution("P11",P11,gate_index = gate_index)
-    PC.plotTimeEvolution("P01",P01,gate_index = gate_index)
-    PC.plotTimeEvolution("P10",P10,gate_index = gate_index)
+    # PC.plotTimeEvolution("P00",P00,gate_index = gate_index)
+    # PC.plotTimeEvolution("P11",P11,gate_index = gate_index)
+    # PC.plotTimeEvolution("P01",P01,gate_index = gate_index)
+    # PC.plotTimeEvolution("P10",P10,gate_index = gate_index)
     PC.plotVariable("Omega",PC.TPP.Omega)
-    PC.plotVariable("delta",PC.TPP.delta)
+    plot_delta(PC.TPP.delta)
     
     ##
     fig, ax = plt.subplots(figsize=(10, 6))
@@ -511,8 +558,8 @@ def plotResult() -> None:
     ax.plot(PC.TPP.tau_array*1000000, P00, label='P00')
     ax.plot(PC.TPP.tau_array*1000000, P11, label='P11', color='r')
     ax.plot(PC.TPP.tau_array*1000000, P01+P10, label='P01+P10', color='g')
-    ax.axvline(x=PC.TPP.tau_array[gate_index]*1000000, color = 'r',  linestyle='--', 
-               label=f'gate time = {PC.TPP.tau_array[gate_index]*1000000}')
+    # ax.axvline(x=PC.TPP.tau_array[gate_index]*1000000, color = 'r',  linestyle='--', 
+    #            label=f'gate time = {PC.TPP.tau_array[gate_index]*1000000}')
     
     ax.set_title('Population')
     ax.legend()
@@ -521,9 +568,21 @@ def plotResult() -> None:
     plt.ylim(0,1)
     plt.savefig(f"figures/population.png", dpi=IMAGE_DPI)
     plt.show()
+
+def plot_delta(delta):
+    plt.figure(dpi=IMAGE_DPI)
+    positions = np.arange(len(delta))
+    plt.bar(positions, delta/(1e6*2*np.pi))
     
-    print(f"gate_index : {gate_index}")
+    for y in ADAM.omega:
+        plt.axhline(y/(1e6 * np.pi * 2), color='red', linestyle=':')
     
+    plt.xlabel('index')
+    plt.ylabel('Variable [MHz]')
+    plt.title("delta")
+    plt.savefig(f"figures/delta.png", dpi=IMAGE_DPI)
+    plt.show()
+
 if __name__ == "__main__":
     ADAM.setGlobalVariables(file_path = "OptimizationConfiguration.json")
     doCalculation()
